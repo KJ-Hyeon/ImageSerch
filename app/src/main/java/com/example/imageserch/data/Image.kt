@@ -9,4 +9,4 @@ data class Image(
     val image_url: String,
     val thumbnail_url: String,
     val width: Int
-)
+): HomeData()

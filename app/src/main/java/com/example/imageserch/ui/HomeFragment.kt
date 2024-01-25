@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.databinding.FragmentHomeBinding
+import com.example.imageserch.ui.adapter.HomeAdapter
 import com.example.imageserch.viewmodel.HomeViewModel
 import com.example.imageserch.viewmodel.ViewModelFactory
 
@@ -19,6 +20,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val homeViewModel: HomeViewModel by lazy { ViewModelProvider(this, ViewModelFactory())[HomeViewModel::class.java] }
+    private val homeAdapter: HomeAdapter by lazy { HomeAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,6 +29,7 @@ class HomeFragment : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         initSearchView()
+        initRecyclerView()
         dataObserve()
         return binding.root
     }
@@ -45,9 +48,13 @@ class HomeFragment : Fragment() {
         })
     }
 
+    private fun initRecyclerView() {
+        binding.homeRev.adapter = homeAdapter
+    }
+
     private fun dataObserve() {
         homeViewModel.homeData.observe(viewLifecycleOwner) {
-            Log.d("homeData","$it")
+            homeAdapter.submitList(it.images)
         }
     }
 
