@@ -17,6 +17,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.imageserch.BuildConfig
+import com.example.imageserch.MyApp
 import com.example.imageserch.data.Image
 import com.example.imageserch.databinding.FragmentHomeBinding
 import com.example.imageserch.ui.adapter.HomeAdapter
@@ -56,18 +57,23 @@ class HomeFragment : Fragment() {
     }
 
     private fun initSearchView() {
-        binding.homeSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                searchQuery = query ?: ""
-                page = 1
-                homeViewModel.getImage(key, searchQuery, page)
-                return false
-            }
+        val previousQuery = MyApp.pref.getString("FirstQuery", " ")
+        with(binding.homeSearch) {
+            setQuery(previousQuery, false)
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    searchQuery = query ?: ""
+                    page = 1
+                    homeViewModel.getImage(key, searchQuery, page)
+                    MyApp.pref.setString("FirstQuery", searchQuery)
+                    return false
+                }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                return false
-            }
-        })
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    return false
+                }
+            })
+        }
     }
 
     private fun initFloatingButton() {
