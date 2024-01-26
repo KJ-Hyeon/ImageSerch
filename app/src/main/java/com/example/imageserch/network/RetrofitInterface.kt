@@ -9,7 +9,8 @@ interface RetrofitInterface {
     @GET("v2/search/image")
     suspend fun getImage(
         @Header ("Authorization") key: String,
-        @Query ("query") query: String
+        @Query ("query") query: String,
+        @Query ("page") page: Int
     ): ImageResponse
 
 }
