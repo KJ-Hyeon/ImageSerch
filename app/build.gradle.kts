@@ -65,6 +65,8 @@ dependencies {
     //Glide
     implementation ("com.github.bumptech.glide:glide:4.13.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.13.0")
+    //Loading animations
+    implementation ("com.github.ybq:Android-SpinKit:1.4.0")
 
 }
 

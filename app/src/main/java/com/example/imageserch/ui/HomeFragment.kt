@@ -32,6 +32,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val homeViewModel: HomeViewModel by lazy { ViewModelProvider(this, ViewModelFactory())[HomeViewModel::class.java] }
     private val homeAdapter: HomeAdapter by lazy { HomeAdapter() }
+    private val loadingDialog: LoadingDialog by lazy { LoadingDialog(requireContext()) }
     private val key :String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
     private lateinit var searchQuery: String
     private var page: Int = 1
@@ -111,8 +112,22 @@ class HomeFragment : Fragment() {
         val totalItemCount = layoutManager.itemCount
 
         if (lastItemPosition == totalItemCount - 1) {
-            // TODO: 여기서 다음페이지 요청 보내기
-            homeViewModel.getImage(key, searchQuery ?: "", ++page)
+            showLoading()
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(2000) // Loading창을 보여주기 해서 원래 로딩 시간이 길어진다면 뷰모델에서 데이터를 받아올때 까지 기다려야하는건가? 변수를 만들어서?
+                homeViewModel.getImage(key, searchQuery ?: "", ++page)
+                dismissLoading()
+            }
+        }
+    }
+
+    fun showLoading() {
+        loadingDialog.show()
+    }
+    fun dismissLoading() {
+        if (loadingDialog.isShowing) {
+            loadingDialog.dismiss()
+            binding.homeSearch.clearFocus()
         }
     }
 
