@@ -30,7 +30,13 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
         viewModelScope.launch {
             val image = homeRepository.getImage(key, query, page)
             val video = homeRepository.getVideo(key, query, page)
-            val homList = image.images + video.videos
+            val homList = (image.images + video.videos).toMutableList()
+            homList.sortByDescending { homeData ->
+                when(homeData) {
+                    is Image -> homeData.datetime
+                    is Video -> homeData.datetime
+                }
+            }
             _homeData.value = homList
         }
     }
