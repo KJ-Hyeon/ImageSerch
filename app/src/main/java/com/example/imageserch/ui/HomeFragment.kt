@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
@@ -18,7 +19,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.MyApp
+import com.example.imageserch.R
+import com.example.imageserch.data.HomeData
 import com.example.imageserch.data.Image
+import com.example.imageserch.data.Video
 import com.example.imageserch.databinding.FragmentHomeBinding
 import com.example.imageserch.ui.adapter.HomeAdapter
 import com.example.imageserch.viewmodel.HomeViewModel
@@ -64,7 +68,7 @@ class HomeFragment : Fragment() {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     searchQuery = query ?: ""
                     page = 1
-                    homeViewModel.getImage(key, searchQuery, page)
+                    homeViewModel.getHomeData(key, searchQuery, page)
                     MyApp.pref.setString("FirstQuery", searchQuery)
                     return false
                 }
@@ -87,6 +91,13 @@ class HomeFragment : Fragment() {
     private fun initRecyclerView() {
         with(binding.homeRev) {
             adapter = homeAdapter
+            homeAdapter.listener = object : HomeAdapter.OnItemClickListener {
+                override fun onLikeClick(pos: Int, iv:ImageView) {
+                    val dataType = homeAdapter.currentList[pos]
+                    iv.setLikeImage(homeViewModel.changeLikeState(dataType))
+                }
+
+            }
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 var isTop = true
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -105,10 +116,13 @@ class HomeFragment : Fragment() {
 
     private fun dataObserve() {
         with(homeViewModel) {
-            homeData.observe(viewLifecycleOwner) {
-                val updateList = homeAdapter.currentList + it.images
+            homeData.observe(viewLifecycleOwner) {homeList ->
+                val updateList = homeAdapter.currentList + homeList
                 homeAdapter.submitList(updateList)
             }
+//            isLike.observe(viewLifecycleOwner) { isLike ->
+//
+//            }
         }
     }
 
@@ -121,9 +135,17 @@ class HomeFragment : Fragment() {
             showLoading()
             viewLifecycleOwner.lifecycleScope.launch {
                 delay(2000) // Loading창을 보여주기 해서 원래 로딩 시간이 길어진다면 뷰모델에서 데이터를 받아올때 까지 기다려야하는건가? 변수를 만들어서?
-                homeViewModel.getImage(key, searchQuery ?: "", ++page)
+                homeViewModel.getHomeData(key, searchQuery ?: "", ++page)
                 dismissLoading()
             }
+        }
+    }
+
+    fun ImageView.setLikeImage(state: Boolean) {
+        if (state) {
+            this.setImageResource(R.drawable.like_fill)
+        } else {
+            this.setImageResource(R.drawable.like)
         }
     }
 
