@@ -1,92 +1,65 @@
 package com.example.imageserch.ui.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.VideoView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.imageserch.data.HomeData
 import com.example.imageserch.data.Image
+import com.example.imageserch.data.SearchItem
 import com.example.imageserch.data.Video
 import com.example.imageserch.databinding.ItemImageBinding
 import com.example.imageserch.databinding.ItemVideoBinding
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-const val ITEM_IMAGE = 1
-const val ITEM_VIDEO = 2
-class HomeAdapter : ListAdapter<HomeData, RecyclerView.ViewHolder>(diffUtil) {
+class HomeAdapter : ListAdapter<SearchItem, HomeAdapter.SearchViewHolder>(diffUtil) {
 
     interface OnItemClickListener {
-        fun onLikeClick(pos: Int, iv: ImageView)
+        fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView)
     }
     var listener: OnItemClickListener? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):SearchViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        return when(viewType) {
-            ITEM_IMAGE -> ImageViewHolder(ItemImageBinding.inflate(layoutInflater, parent, false))
-            ITEM_VIDEO -> VideoViewHolder(ItemVideoBinding.inflate(layoutInflater, parent, false))
-            else -> throw IllegalArgumentException("UnKnown $viewType")
-        }
+        return SearchViewHolder(ItemImageBinding.inflate(layoutInflater, parent, false))
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when(holder) {
-            is ImageViewHolder -> holder.bind(currentList[position] as Image)
-            is VideoViewHolder -> holder.bind(currentList[position] as Video)
-        }
+    override fun onBindViewHolder(holder: SearchViewHolder, position: Int) {
+        holder.bind(currentList[position])
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (currentList[position] is Image) ITEM_IMAGE else ITEM_VIDEO
-    }
     fun String.setTime(): String {
         val dateTime = OffsetDateTime.parse(this)
         val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         return dateTime.format(dateFormat)
     }
 
-    inner class ImageViewHolder(private val binding: ItemImageBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Image) {
+    inner class SearchViewHolder(private val binding: ItemImageBinding): RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: SearchItem) {
             with(binding) {
-                itemImageTitle.text = item.display_sitename
-                itemImageDate.text = item.datetime.setTime()
+                if (item.type == "image") itemImageTag.text = "[이미지]"
+                else itemImageTag.text = "[비디오]"
+                itemImageTitle.text = item.title
+                itemImageDate.text = item.dateTime.setTime()
                 Glide.with(itemImageImage)
-                    .load(item.thumbnail_url)
+                    .load(item.thumbnail)
                     .into(itemImageImage)
                 itemImageLike.setOnClickListener {
-                    listener?.onLikeClick(adapterPosition, binding.itemImageLike)
-                }
-            }
-        }
-    }
-
-    inner class VideoViewHolder(private val binding: ItemVideoBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: Video) {
-            with(binding) {
-                itemVideoTitle.text = item.title
-                itemVideoDate.text = item.datetime.setTime()
-                Glide.with(itemVideoImage)
-                    .load(item.thumbnail)
-                    .into(itemVideoImage)
-                itemVideoLike.setOnClickListener {
-                    listener?.onLikeClick(adapterPosition, binding.itemVideoLike)
+                    listener?.onLikeClick(adapterPosition, item ,binding.itemImageLike)
                 }
             }
         }
     }
     companion object {
-        val diffUtil = object : DiffUtil.ItemCallback<HomeData>() {
-            override fun areItemsTheSame(oldItem: HomeData, newItem: HomeData): Boolean {
+        val diffUtil = object : DiffUtil.ItemCallback<SearchItem>() {
+            override fun areItemsTheSame(oldItem: SearchItem, newItem: SearchItem): Boolean {
                 return oldItem === newItem
             }
 
-            override fun areContentsTheSame(oldItem: HomeData, newItem: HomeData): Boolean {
+            override fun areContentsTheSame(oldItem: SearchItem, newItem: SearchItem): Boolean {
                 return oldItem == newItem
             }
         }

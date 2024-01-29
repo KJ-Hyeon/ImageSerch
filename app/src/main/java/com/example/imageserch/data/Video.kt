@@ -8,4 +8,4 @@ data class Video(
     val title: String,
     val url: String,
     var isLike: Boolean = false
-): HomeData()
+)

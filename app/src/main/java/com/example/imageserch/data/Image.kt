@@ -10,4 +10,4 @@ data class Image(
     val thumbnail_url: String,
     val width: Int,
     var isLike: Boolean = false
-): HomeData()
+)
