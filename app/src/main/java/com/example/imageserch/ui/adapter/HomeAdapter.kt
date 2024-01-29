@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.imageserch.R
 import com.example.imageserch.data.Image
 import com.example.imageserch.data.SearchItem
 import com.example.imageserch.data.Video
@@ -44,6 +45,9 @@ class HomeAdapter : ListAdapter<SearchItem, HomeAdapter.SearchViewHolder>(diffUt
                 else itemImageTag.text = "[비디오]"
                 itemImageTitle.text = item.title
                 itemImageDate.text = item.dateTime.setTime()
+                if (item.like) itemImageLike.setImageResource(R.drawable.like_fill)
+                else itemImageLike.setImageResource(R.drawable.like)
+
                 Glide.with(itemImageImage)
                     .load(item.thumbnail)
                     .into(itemImageImage)

@@ -22,8 +22,11 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
         viewModelScope.launch {
             val image = homeRepository.getImageToHomeData(key, query, page)
             val video = homeRepository.getVideoToHomeData(key, query, page)
-            val searchList = image + video
-            _searchList.value = searchList.sortedByDescending { it.dateTime }
+            (image + video).toMutableList().apply {
+                sortByDescending { it.dateTime }
+                checkLikeItems()
+                Log.d("ViewModel:","searchList:: $this")
+            }.also { _searchList.value = it }
         }
     }
 
@@ -38,4 +41,7 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
         _likeList.value = homeRepository.loadLikeItems()
     }
 
+    private fun MutableList<SearchItem>.checkLikeItems(){
+        homeRepository.checkLikeItems(this)
+    }
 }

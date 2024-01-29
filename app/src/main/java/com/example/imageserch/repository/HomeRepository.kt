@@ -1,5 +1,6 @@
 package com.example.imageserch.repository
 
+import android.util.Log
 import com.example.imageserch.MyApp
 import com.example.imageserch.data.Image
 import com.example.imageserch.data.ImageResponse
@@ -48,10 +49,14 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
     }
 
     fun loadLikeItems(): MutableList<SearchItem> {
+        Log.d("HomeRepository:","loadLikeItems: ${MyApp.pref.loadLikeItems()}")
         return MyApp.pref.loadLikeItems()
     }
 
-
-
-
+    fun checkLikeItems(items: MutableList<SearchItem>) {
+        val likeKeyList = loadLikeItems().map { it.thumbnail }
+        items.forEach { searchItem ->
+           if (searchItem.thumbnail in likeKeyList) searchItem.like = true
+        }
+    }
 }
