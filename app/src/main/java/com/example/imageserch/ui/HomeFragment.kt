@@ -1,28 +1,21 @@
 package com.example.imageserch.ui
 
-import android.graphics.fonts.Font
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.MyApp
 import com.example.imageserch.R
-import com.example.imageserch.data.HomeData
-import com.example.imageserch.data.Image
-import com.example.imageserch.data.Video
+import com.example.imageserch.data.SearchItem
 import com.example.imageserch.databinding.FragmentHomeBinding
 import com.example.imageserch.ui.adapter.HomeAdapter
 import com.example.imageserch.viewmodel.HomeViewModel
@@ -41,6 +34,7 @@ class HomeFragment : Fragment() {
     private val key :String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
     private lateinit var searchQuery: String
     private var page: Int = 1
+    private var updateList = mutableListOf<SearchItem>()
 
 
     override fun onCreateView(
@@ -68,8 +62,10 @@ class HomeFragment : Fragment() {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     searchQuery = query ?: ""
                     page = 1
+                    updateList.clear()
                     homeViewModel.getHomeData(key, searchQuery, page)
                     MyApp.pref.setString("FirstQuery", searchQuery)
+                    homeViewModel.loadLikeItems()
                     return false
                 }
 
@@ -92,9 +88,14 @@ class HomeFragment : Fragment() {
         with(binding.homeRev) {
             adapter = homeAdapter
             homeAdapter.listener = object : HomeAdapter.OnItemClickListener {
-                override fun onLikeClick(pos: Int, iv:ImageView) {
-                    val dataType = homeAdapter.currentList[pos]
-                    iv.setLikeImage(homeViewModel.changeLikeState(dataType))
+                override fun onLikeClick(pos: Int, data: SearchItem, iv:ImageView) {
+                    iv.setLikeImage(!data.like)
+                    data.like = !data.like
+                    if (data.like) {
+                        homeViewModel.addLikeItem(data)
+                    } else {
+                        homeViewModel.removeLikeItem(data)
+                    }
                 }
 
             }
@@ -116,13 +117,13 @@ class HomeFragment : Fragment() {
 
     private fun dataObserve() {
         with(homeViewModel) {
-            homeData.observe(viewLifecycleOwner) {homeList ->
-                val updateList = homeAdapter.currentList + homeList
+            searchList.observe(viewLifecycleOwner) {searchList ->
+                updateList = (homeAdapter.currentList + searchList).toMutableList()
                 homeAdapter.submitList(updateList)
             }
-//            isLike.observe(viewLifecycleOwner) { isLike ->
-//
-//            }
+            likeList.observe(viewLifecycleOwner) { likeList ->
+                Log.d("likeList:","likeList::$likeList")
+            }
         }
     }
 

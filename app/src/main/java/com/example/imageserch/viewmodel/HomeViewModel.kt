@@ -5,46 +5,37 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.imageserch.data.HomeData
-import com.example.imageserch.data.Image
-import com.example.imageserch.data.ImageResponse
-import com.example.imageserch.data.Video
+import com.example.imageserch.data.SearchItem
+
 import com.example.imageserch.repository.HomeRepository
-import kotlinx.coroutines.delay
+
 import kotlinx.coroutines.launch
 
 
 class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
-    private var _homeData = MutableLiveData<List<HomeData>>()
-    var homeData: LiveData<List<HomeData>> = _homeData
-    private var _isLike = MutableLiveData<Boolean>()
-    var isLike: LiveData<Boolean> = _isLike
-
-//    fun getImage(key: String, query: String, page: Int = 1) {
-//        viewModelScope.launch {
-//            _homeData.value = homeRepository.getImage(key, query, page)
-//        }
-//    }
+    private var _searchList = MutableLiveData<List<SearchItem>>()
+    var searchList: LiveData<List<SearchItem>> = _searchList
+    private var _likeList = MutableLiveData<List<SearchItem>>()
+    var likeList: LiveData<List<SearchItem>> = _likeList
 
     fun getHomeData(key: String, query: String, page: Int = 1) {
         viewModelScope.launch {
-            val image = homeRepository.getImage(key, query, page)
-            val video = homeRepository.getVideo(key, query, page)
-            val homList = (image.images + video.videos).toMutableList()
-            homList.sortByDescending { homeData ->
-                when(homeData) {
-                    is Image -> homeData.datetime
-                    is Video -> homeData.datetime
-                }
-            }
-            _homeData.value = homList
+            val image = homeRepository.getImageToHomeData(key, query, page)
+            val video = homeRepository.getVideoToHomeData(key, query, page)
+            val searchList = image + video
+            _searchList.value = searchList.sortedByDescending { it.dateTime }
         }
     }
-    fun changeLikeState(item: HomeData): Boolean = homeRepository.changeLikeState(item)
 
-//    fun changeLikeState(item: HomeData) {
-//        _isLike.value = homeRepository.changeLikeState(item)
-//    }
+    fun addLikeItem(item: SearchItem) {
+        homeRepository.addLikeItem(item)
+    }
 
+    fun removeLikeItem(item: SearchItem) {
+        homeRepository.removeItem(item)
+    }
+    fun loadLikeItems() {
+        _likeList.value = homeRepository.loadLikeItems()
+    }
 
 }
