@@ -33,8 +33,9 @@ class HomeFragment : Fragment() {
     private val loadingDialog: LoadingDialog by lazy { LoadingDialog(requireContext()) }
     private val key :String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
     private lateinit var searchQuery: String
-    private var page: Int = 1
+    private var page: Int = 0
     private var updateList = mutableListOf<SearchItem>()
+    private var isLoading = false
 
 
     override fun onCreateView(
@@ -54,6 +55,16 @@ class HomeFragment : Fragment() {
         dataObserve()
     }
 
+    override fun onResume() {
+        super.onResume()
+        val likeList = MyApp.pref.loadLikeItems()
+        homeAdapter.currentList.forEach {
+            if(!likeList.contains(it)) it.like = false
+        }
+        homeAdapter.notifyDataSetChanged()
+//        homeAdapter.submitList(homeAdapter.currentList.toList())
+    }
+
     private fun initSearchView() {
         val previousQuery = MyApp.pref.getString("FirstQuery", " ")
         with(binding.homeSearch) {
@@ -65,7 +76,6 @@ class HomeFragment : Fragment() {
                     updateList.clear()
                     homeViewModel.getHomeData(key, searchQuery, page)
                     MyApp.pref.setString("FirstQuery", searchQuery)
-                    homeViewModel.loadLikeItems()
                     return false
                 }
 
@@ -118,11 +128,12 @@ class HomeFragment : Fragment() {
     private fun dataObserve() {
         with(homeViewModel) {
             searchList.observe(viewLifecycleOwner) {searchList ->
+                Log.d("TAG","searchList Observe")
                 updateList = (homeAdapter.currentList + searchList).toMutableList()
-                homeAdapter.submitList(updateList)
+                homeAdapter.submitList(searchList)
             }
-            likeList.observe(viewLifecycleOwner) { likeList ->
-                Log.d("likeList:","likeList::$likeList")
+            isLoading.observe(viewLifecycleOwner) { isLoading ->
+                this@HomeFragment.isLoading = isLoading
             }
         }
     }
@@ -132,10 +143,12 @@ class HomeFragment : Fragment() {
         val lastItemPosition = layoutManager.findLastVisibleItemPosition()
         val totalItemCount = layoutManager.itemCount
 
-        if (lastItemPosition == totalItemCount - 1) {
+        if (!isLoading && lastItemPosition == totalItemCount - 1) {
+            isLoading = true
+            Log.d("checkLastItem","recyclerView last")
             showLoading()
             viewLifecycleOwner.lifecycleScope.launch {
-                delay(2000) // Loading창을 보여주기 해서 원래 로딩 시간이 길어진다면 뷰모델에서 데이터를 받아올때 까지 기다려야하는건가? 변수를 만들어서?
+                delay(2000)
                 homeViewModel.getHomeData(key, searchQuery ?: "", ++page)
                 dismissLoading()
             }
@@ -188,6 +201,4 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-
 }

@@ -60,7 +60,7 @@ class HomeAdapter : ListAdapter<SearchItem, HomeAdapter.SearchViewHolder>(diffUt
     companion object {
         val diffUtil = object : DiffUtil.ItemCallback<SearchItem>() {
             override fun areItemsTheSame(oldItem: SearchItem, newItem: SearchItem): Boolean {
-                return oldItem === newItem
+                return oldItem.thumbnail == newItem.thumbnail
             }
 
             override fun areContentsTheSame(oldItem: SearchItem, newItem: SearchItem): Boolean {

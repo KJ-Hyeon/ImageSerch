@@ -11,6 +11,10 @@ class ViewModelFactory: ViewModelProvider.Factory {
             val repository = HomeRepository(RetrofitInstance.kakaoRetrofit)
             return HomeViewModel(repository) as T
         }
+        if (modelClass.isAssignableFrom(StorageViewModel::class.java)) {
+            val repository = HomeRepository(RetrofitInstance.kakaoRetrofit)
+            return StorageViewModel(repository) as T
+        }
         else throw IllegalArgumentException ("UnKnown ViewModel $modelClass")
     }
 }

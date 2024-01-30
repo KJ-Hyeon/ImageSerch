@@ -13,8 +13,8 @@
 
     <fragment
         android:id="@+id/navigation_storage"
-        android:name="com.example.imageserch.ui.DashboardFragment"
+        android:name="com.example.imageserch.ui.StorageFragment"
         android:label="@string/title_storage"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_storage" />
 
 </navigation>

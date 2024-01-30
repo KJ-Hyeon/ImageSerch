@@ -49,7 +49,6 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
     }
 
     fun loadLikeItems(): MutableList<SearchItem> {
-        Log.d("HomeRepository:","loadLikeItems: ${MyApp.pref.loadLikeItems()}")
         return MyApp.pref.loadLikeItems()
     }
 

@@ -25,12 +25,11 @@ class PrefUtil(context: Context) {
 
     fun removeItem(item: SearchItem) {
         searchPref.edit().remove(item.thumbnail).apply()
-        Log.d("removeItem:","removeItem: $item")
     }
 
     fun loadLikeItems(): MutableList<SearchItem> {
         val likeList = mutableListOf<SearchItem>()
-        searchPref.all.forEach { key, value ->
+        searchPref.all.forEach { (key, value) ->
             val likeItem = Gson().fromJson(value as? String, SearchItem::class.java)
             likeList.add(likeItem)
         }
