@@ -9,6 +9,7 @@ import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -127,10 +128,10 @@ class HomeFragment : Fragment() {
 
     private fun dataObserve() {
         with(homeViewModel) {
-            searchList.observe(viewLifecycleOwner) {searchList ->
-                Log.d("TAG","searchList Observe")
+            searchList.distinctUntilChanged().observe(viewLifecycleOwner) {searchList ->
+                Log.d("searchList:","SearchList: $searchList")
                 updateList = (homeAdapter.currentList + searchList).toMutableList()
-                homeAdapter.submitList(searchList)
+                homeAdapter.submitList(updateList)
             }
             isLoading.observe(viewLifecycleOwner) { isLoading ->
                 this@HomeFragment.isLoading = isLoading
@@ -146,12 +147,12 @@ class HomeFragment : Fragment() {
         if (!isLoading && lastItemPosition == totalItemCount - 1) {
             isLoading = true
             Log.d("checkLastItem","recyclerView last")
-            showLoading()
-            viewLifecycleOwner.lifecycleScope.launch {
-                delay(2000)
+//            showLoading()
+//            viewLifecycleOwner.lifecycleScope.launch {
+//                delay(2000)
                 homeViewModel.getHomeData(key, searchQuery ?: "", ++page)
-                dismissLoading()
-            }
+//                dismissLoading()
+//            }
         }
     }
 

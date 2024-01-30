@@ -17,8 +17,8 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
     var searchList: LiveData<List<SearchItem>> = _searchList
     private var _isLoading = MutableLiveData<Boolean>()
     var isLoading: LiveData<Boolean> = _isLoading
-    private var _likeList = MutableLiveData<List<SearchItem>>()
-    var likeList: LiveData<List<SearchItem>> = _likeList
+//    private var _likeList = MutableLiveData<List<SearchItem>>()
+//    var likeList: LiveData<List<SearchItem>> = _likeList
 
     fun getHomeData(key: String, query: String, page: Int = 1) {
         viewModelScope.launch {
@@ -49,9 +49,5 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
         homeRepository.checkLikeItems(items)
     }
 
-    fun updateCheckLikeItems() {
-        searchList.value?.toMutableList()?.let {
-            homeRepository.checkLikeItems(it)
-        }
-    }
+
 }
