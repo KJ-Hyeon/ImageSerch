@@ -1,45 +1,56 @@
 package com.example.imageserch.repository
 
+import android.util.Log
 import com.example.imageserch.MyApp
 import com.example.imageserch.data.SearchItem
 import com.example.imageserch.network.RetrofitInterface
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 
 
 class HomeRepository(private val retrofit: RetrofitInterface) {
 
     private var searchList = mutableListOf<SearchItem>()
+    private val pageExceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Log.e("pageExceptionHandler","$exception")
+    }
 
     private suspend fun getImage(key: String, query: String, page: Int) =
-        withContext(Dispatchers.IO) { retrofit.getImage(key, query, page) }
+        withContext(Dispatchers.IO) {
+            runCatching {
+                retrofit.getImage(key, query, page,)
+            }.onFailure {
+                Log.e("getImageError:","$it")
+            }
+        }
+
 
     private suspend fun getVideo(key: String, query: String, page: Int) =
-        withContext(Dispatchers.IO) {retrofit.getVideo(key, query, page)}
-
-//    suspend fun getImageToHomeData(key: String, query: String, page: Int):MutableList<SearchItem> {
-//        val searchImageList = mutableListOf<SearchItem>()
-//        val imageResponse = getImage(key,query,page)
-//        imageResponse.images.forEach {
-//            val searchItem = SearchItem("image", it.thumbnail_url, it.display_sitename, it.datetime, it.display_sitename,false)
-//            searchImageList.add(searchItem)
-//        }
-//        return searchImageList
-//    }
+        withContext(Dispatchers.IO) {
+            runCatching {
+                retrofit.getVideo(key, query, page)
+            }.onFailure {
+                Log.e("getVideoError:","$it")
+            }
+        }
 
     private suspend fun getApiToSearchItem (key: String, query: String, page: Int):MutableList<SearchItem> {
         val searchItems = mutableListOf<SearchItem>()
-        val videoResponse = getVideo(key, query, page)
-        val imageResponse = getImage(key, query, page)
-
-        searchItems.addAll(videoResponse.videos.map {
-            SearchItem("video", it.thumbnail, it.title, it.datetime, it.title, false)
-        })
-
-        searchItems.addAll(imageResponse.images.map {
-            SearchItem("image", it.thumbnail_url, it.display_sitename, it.datetime, it.display_sitename, false)
-        })
-
+        getVideo(key, query, page)?.let {result ->
+            result.onSuccess { videoResponse ->
+                searchItems.addAll(videoResponse.videos.map {
+                SearchItem("video", it.thumbnail, it.title, it.datetime, it.title, false)
+            })}
+        }
+        getImage(key, query, page).let {result->
+            result.onSuccess { imageResponse->
+                searchItems.addAll(imageResponse.images.map {
+                    SearchItem("image", it.thumbnail_url, it.display_sitename, it.datetime, it.display_sitename, false)
+                })
+            }
+        }
         return searchItems
     }
 
@@ -51,20 +62,9 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
 
     private fun isNewSearch(page: Int) = page==1
 
-    fun addLikeItem(item: SearchItem) {
-        MyApp.pref.addLikeItem(item)
-    }
-
-    fun removeItem(item: SearchItem) {
-        MyApp.pref.removeItem(item)
-    }
-
-    fun loadLikeItems(): MutableList<SearchItem> {
-        return MyApp.pref.loadLikeItems()
-    }
-
     fun checkLikeItems(items: MutableList<SearchItem>) {
-        val likeKeyList = loadLikeItems().map { it.thumbnail }
+        val likeList = MyApp.pref.loadLikeItems()
+        val likeKeyList = likeList.map { it.thumbnail }
         items.forEach { searchItem ->
            if (searchItem.thumbnail in likeKeyList) searchItem.like = true
         }

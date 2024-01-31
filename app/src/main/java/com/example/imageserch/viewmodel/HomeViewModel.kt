@@ -42,18 +42,6 @@ class HomeViewModel(private val homeRepository: HomeRepository) : ViewModel() {
         _page.value = 1
     }
 
-
-    fun addLikeItem(item: SearchItem) {
-        homeRepository.addLikeItem(item)
-    }
-
-    fun removeLikeItem(item: SearchItem) {
-        homeRepository.removeItem(item)
-    }
-//    fun loadLikeItems() {
-//        _likeList.value = homeRepository.loadLikeItems()
-//    }
-
     private fun checkLikeItems(items: MutableList<SearchItem>) {
         homeRepository.checkLikeItems(items)
     }

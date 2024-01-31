@@ -7,11 +7,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.imageserch.R
+import com.example.imageserch.SharedViewModel
 import com.example.imageserch.data.SearchItem
 import com.example.imageserch.databinding.FragmentStorageBinding
 import com.example.imageserch.ui.adapter.HomeAdapter
-import com.example.imageserch.viewmodel.StorageViewModel
 import com.example.imageserch.viewmodel.ViewModelFactory
 
 class StorageFragment : Fragment() {
@@ -19,7 +18,7 @@ class StorageFragment : Fragment() {
     private var _binding: FragmentStorageBinding? = null
     private val binding get() = _binding!!
     private val homeAdapter: HomeAdapter by lazy { HomeAdapter() }
-    private val storageViewModel: StorageViewModel by viewModels { ViewModelFactory() }
+    private val sharedViewModel: SharedViewModel by viewModels { ViewModelFactory() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,7 +31,6 @@ class StorageFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        storageViewModel.getLikeList()
     }
 
     override fun onPause() {
@@ -41,6 +39,7 @@ class StorageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        sharedViewModel.getLikeList()
         initRecyclerView()
         dataObserve()
     }
@@ -56,8 +55,8 @@ class StorageFragment : Fragment() {
             homeAdapter.listener = object : HomeAdapter.OnItemClickListener {
                 override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView) {
                     data.like = !data.like
-                    storageViewModel.removeLikeItem(data)
-                    storageViewModel.getLikeList()
+                    sharedViewModel.removeLikeItem(data)
+                    sharedViewModel.getLikeList()
                 }
 
             }
@@ -65,7 +64,7 @@ class StorageFragment : Fragment() {
     }
 
     private fun dataObserve() {
-        with(storageViewModel) {
+        with(sharedViewModel) {
             likeList.observe(viewLifecycleOwner) {
                 homeAdapter.submitList(it)
             }

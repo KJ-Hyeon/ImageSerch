@@ -8,16 +8,20 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Recycler
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.MyApp
 import com.example.imageserch.R
+import com.example.imageserch.SharedViewModel
 import com.example.imageserch.data.SearchItem
 import com.example.imageserch.databinding.FragmentHomeBinding
+import com.example.imageserch.extention.fadeAnimation
 import com.example.imageserch.ui.adapter.HomeAdapter
 import com.example.imageserch.viewmodel.HomeViewModel
 import com.example.imageserch.viewmodel.ViewModelFactory
@@ -29,12 +33,12 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private val homeViewModel: HomeViewModel by lazy { ViewModelProvider(this, ViewModelFactory())[HomeViewModel::class.java] }
+    private val homeViewModel: HomeViewModel by viewModels { ViewModelFactory() }
+    private val sharedViewModel: SharedViewModel by viewModels { ViewModelFactory() }
     private val homeAdapter: HomeAdapter by lazy { HomeAdapter() }
     private val loadingDialog: LoadingDialog by lazy { LoadingDialog(requireContext()) }
-    private val key :String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
+    private val key: String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
     private lateinit var searchQuery: String
-    private var updateList = mutableListOf<SearchItem>()
     private var isLoading = false
 
 
@@ -49,20 +53,20 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initSearchView()
-        initFloatingButton()
-        initRecyclerView()
+        initViews()
         dataObserve()
     }
 
-    override fun onStart() {
-        super.onStart()
+    private fun initViews() {
+        initSearchView()
+        initRecyclerView()
     }
+
     override fun onResume() {
         super.onResume()
         val likeList = MyApp.pref.loadLikeItems()
         homeAdapter.currentList.forEach {
-            if(!likeList.contains(it)) it.like = false
+            if (!likeList.contains(it)) it.like = false
         }
         homeAdapter.notifyDataSetChanged()
 //        homeAdapter.submitList(homeAdapter.currentList.toList())
@@ -70,6 +74,7 @@ class HomeFragment : Fragment() {
 
     private fun initSearchView() {
         val previousQuery = MyApp.pref.getString("FirstQuery", " ")
+
         with(binding.homeSearch) {
             setQuery(previousQuery, false)
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -87,48 +92,61 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun initFloatingButton() {
-        with(binding) {
-            homeFloatingButton.setOnClickListener {
-                homeRev.smoothScrollToPosition(0)
+    private fun initFloatingButton(isIdle: Boolean, isTop: Boolean) {
+        with(binding.homeFloatingButton) {
+            if (!isIdle || !isTop) {
+                fadeAnimation(false)
+                return
+            }
+            fadeAnimation(true)
+            setOnClickListener {
+                binding.homeRev.smoothScrollToPosition(0)
             }
         }
+    }
+
+    private fun addScroll(recyclerView: RecyclerView) {
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                val isTop = recyclerView.canScrollVertically(-1)
+                val isStop = newState == RecyclerView.SCROLL_STATE_IDLE
+                initFloatingButton(isStop, isTop)
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                // 스크롤을 아래로 땡기면 dy<0 스크롤을 위로 땡기면 dy>0
+                checkLastItem(recyclerView)
+            }
+        })
     }
 
     private fun initRecyclerView() {
         with(binding.homeRev) {
             adapter = homeAdapter
-            homeAdapter.listener = object : HomeAdapter.OnItemClickListener {
-                override fun onLikeClick(pos: Int, data: SearchItem, iv:ImageView) {
-                    iv.setLikeImage(!data.like)
-                    data.like = !data.like
-                    if (data.like) {
-                        homeViewModel.addLikeItem(data)
-                    } else {
-                        homeViewModel.removeLikeItem(data)
-                    }
-                }
-
-            }
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                var isTop = true
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    binding.homeFloatingButton.onScrollStateChange(
-                        newState == RecyclerView.SCROLL_STATE_IDLE, isTop)
-                }
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    isTop = !this@with.canScrollVertically(-1)
-                    checkLastItem(recyclerView)
-                }
-            })
+            addScroll(this)
         }
+        initLikeButton()
+    }
+    private fun initLikeButton () {
+        object : HomeAdapter.OnItemClickListener {
+            override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView) {
+                iv.setLikeImage(!data.like)
+                data.like = !data.like
+                if (data.like) {
+                    sharedViewModel.addLikeItem(data)
+                } else {
+                    sharedViewModel.removeLikeItem(data)
+                }
+            }
+        }.also { homeAdapter.listener = it }
     }
 
     private fun dataObserve() {
         with(homeViewModel) {
-            searchList.observe(viewLifecycleOwner) {searchList ->
+            searchList.observe(viewLifecycleOwner) { searchList ->
                 homeAdapter.submitList(searchList.toList())
             }
 
@@ -136,10 +154,9 @@ class HomeFragment : Fragment() {
                 this@HomeFragment.isLoading = isLoading
             }
 
-            page.observe(viewLifecycleOwner) {page ->
-                Log.d("LiveData page:", "$page")
+            page.observe(viewLifecycleOwner) { page ->
                 val query = MyApp.pref.getString("FirstQuery", " ")
-                homeViewModel.getHomeData(key, query , page)
+                homeViewModel.getHomeData(key, query, page)
             }
 
         }
@@ -173,35 +190,12 @@ class HomeFragment : Fragment() {
     fun showLoading() {
         loadingDialog.show()
     }
+
     fun dismissLoading() {
         if (loadingDialog.isShowing) {
             loadingDialog.dismiss()
             binding.homeSearch.clearFocus()
         }
-    }
-
-    private fun FloatingActionButton.buttonAnimate(isVisible: Boolean) {
-        var isAnimating = false
-
-        if (isVisible && !isAnimating && this.visibility != View.VISIBLE) {
-            this.animate().alpha(1f).setDuration(500).start()
-            isAnimating = true
-            this.visibility = View.VISIBLE
-        } else if (!isVisible && !isAnimating && this.visibility == View.VISIBLE) {
-            this.animate().alpha(0f).setDuration(500).withEndAction {
-                isAnimating = false
-                this.visibility = View.GONE
-            }.start()
-            isAnimating = true
-        }
-    }
-
-    private fun FloatingActionButton.onScrollStateChange(isIdle: Boolean, isTop: Boolean) {
-        if (isIdle) {
-            if (!isTop) this@onScrollStateChange.buttonAnimate(true)
-            return
-        }
-        this@onScrollStateChange.buttonAnimate(false)
     }
 
     override fun onDestroyView() {

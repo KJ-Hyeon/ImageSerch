@@ -11,14 +11,16 @@ interface RetrofitInterface {
     suspend fun getImage(
         @Header ("Authorization") key: String,
         @Query ("query") query: String,
-        @Query ("page") page: Int
+        @Query ("page") page: Int,
+        @Query ("size") size: Int = 50
     ): ImageResponse
 
     @GET("v2/search/vclip")
     suspend fun getVideo(
         @Header ("Authorization") key: String,
         @Query ("query") query: String,
-        @Query ("page") page: Int
+        @Query ("page") page: Int,
+        @Query ("size") size: Int = 30
     ): VIdeoResponse
 
 }
