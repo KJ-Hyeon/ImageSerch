@@ -29,7 +29,6 @@ class HomeViewModel(
         viewModelScope.launch {
             val searchList = homeRepository.getSearchItem(key, query, page)
             searchList.apply {
-                sortByDescending { it.dateTime }
                 checkLikeItems(this)
             }.also {
                 _searchList.value = it
@@ -37,14 +36,6 @@ class HomeViewModel(
             }
         }
     }
-
-//    fun loadNextPage() {
-//        _page.value = page.value?.plus(1)
-//    }
-//
-//    fun loadFirstPage() {
-//        _page.value = 1
-//    }
 
     private fun checkLikeItems(items: MutableList<SearchItem>) {
         homeRepository.checkLikeItems(items)

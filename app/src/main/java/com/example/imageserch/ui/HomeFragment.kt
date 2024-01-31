@@ -141,7 +141,7 @@ class HomeFragment : Fragment() {
             addScroll(this)
         }
         initLikeButton()
-    }
+     }
     private fun initLikeButton () {
         object : HomeAdapter.OnItemClickListener {
             override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView) {
@@ -184,13 +184,12 @@ class HomeFragment : Fragment() {
 
         if (!isLoading && lastItemPosition == totalItemCount - 1) {
             isLoading = true
-            homeViewModel.getHomeData(key, searchQuery, ++page)
-//            showLoading()
-//            viewLifecycleOwner.lifecycleScope.launch {
-
-//                delay(2000)
-//                dismissLoading()
-//            }
+            showLoading()
+            viewLifecycleOwner.lifecycleScope.launch {
+                homeViewModel.getHomeData(key, searchQuery, ++page)
+                delay(2000)
+                dismissLoading()
+            }
         }
     }
 

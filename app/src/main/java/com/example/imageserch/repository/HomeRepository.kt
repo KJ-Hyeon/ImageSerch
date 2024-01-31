@@ -56,6 +56,7 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
 
     suspend fun getSearchItem(key: String, query: String, page: Int): MutableList<SearchItem> {
         val newSearchList = getApiToSearchItem(key, query, page)
+        newSearchList.sortByDescending { it.dateTime }
         if(isNewSearch(page)) searchList.clear()
         return searchList.apply { addAll(newSearchList) }
     }
