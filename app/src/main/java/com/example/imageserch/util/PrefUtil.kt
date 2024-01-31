@@ -10,7 +10,7 @@ class PrefUtil(context: Context) {
     private val searchPref = context.getSharedPreferences("search_pref", Context.MODE_PRIVATE)
 
     fun getString(key: String, defaultValue: String): String {
-        return keywordPref.getString(key,defaultValue).toString()
+        return keywordPref.getString(key, defaultValue).toString()
     }
 
     fun setString(key: String, value: String) {

@@ -35,6 +35,10 @@ class StorageFragment : Fragment() {
         storageViewModel.getLikeList()
     }
 
+    override fun onPause() {
+        super.onPause()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()

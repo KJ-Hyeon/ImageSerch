@@ -34,7 +34,6 @@ class HomeFragment : Fragment() {
     private val loadingDialog: LoadingDialog by lazy { LoadingDialog(requireContext()) }
     private val key :String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
     private lateinit var searchQuery: String
-    private var page: Int = 0
     private var updateList = mutableListOf<SearchItem>()
     private var isLoading = false
 
@@ -56,6 +55,9 @@ class HomeFragment : Fragment() {
         dataObserve()
     }
 
+    override fun onStart() {
+        super.onStart()
+    }
     override fun onResume() {
         super.onResume()
         val likeList = MyApp.pref.loadLikeItems()
@@ -73,10 +75,8 @@ class HomeFragment : Fragment() {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     searchQuery = query ?: ""
-                    page = 1
-                    updateList.clear()
-                    homeViewModel.getHomeData(key, searchQuery, page)
                     MyApp.pref.setString("FirstQuery", searchQuery)
+                    homeViewModel.loadFirstPage()
                     return false
                 }
 
@@ -128,14 +128,20 @@ class HomeFragment : Fragment() {
 
     private fun dataObserve() {
         with(homeViewModel) {
-            searchList.distinctUntilChanged().observe(viewLifecycleOwner) {searchList ->
-                Log.d("searchList:","SearchList: $searchList")
-                updateList = (homeAdapter.currentList + searchList).toMutableList()
-                homeAdapter.submitList(updateList)
+            searchList.observe(viewLifecycleOwner) {searchList ->
+                homeAdapter.submitList(searchList.toList())
             }
+
             isLoading.observe(viewLifecycleOwner) { isLoading ->
                 this@HomeFragment.isLoading = isLoading
             }
+
+            page.observe(viewLifecycleOwner) {page ->
+                Log.d("LiveData page:", "$page")
+                val query = MyApp.pref.getString("FirstQuery", " ")
+                homeViewModel.getHomeData(key, query , page)
+            }
+
         }
     }
 
@@ -146,11 +152,11 @@ class HomeFragment : Fragment() {
 
         if (!isLoading && lastItemPosition == totalItemCount - 1) {
             isLoading = true
-            Log.d("checkLastItem","recyclerView last")
+            homeViewModel.loadNextPage()
 //            showLoading()
 //            viewLifecycleOwner.lifecycleScope.launch {
+
 //                delay(2000)
-                homeViewModel.getHomeData(key, searchQuery ?: "", ++page)
 //                dismissLoading()
 //            }
         }
