@@ -38,7 +38,7 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
 
     private suspend fun getApiToSearchItem (key: String, query: String, page: Int):MutableList<SearchItem> {
         val searchItems = mutableListOf<SearchItem>()
-        getVideo(key, query, page)?.let {result ->
+        getVideo(key, query, page).let {result ->
             result.onSuccess { videoResponse ->
                 searchItems.addAll(videoResponse.videos.map {
                 SearchItem("video", it.thumbnail, it.title, it.datetime, it.title, false)
@@ -65,8 +65,9 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
     fun checkLikeItems(items: MutableList<SearchItem>) {
         val likeList = MyApp.pref.loadLikeItems()
         val likeKeyList = likeList.map { it.thumbnail }
+        Log.d("HomeRepository:","$likeKeyList")
         items.forEach { searchItem ->
-           if (searchItem.thumbnail in likeKeyList) searchItem.like = true
+            searchItem.like = searchItem.thumbnail in likeKeyList
         }
     }
 }

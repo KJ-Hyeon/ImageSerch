@@ -40,6 +40,7 @@ class HomeFragment : Fragment() {
     private val key: String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
     private lateinit var searchQuery: String
     private var isLoading = false
+    private var page = 1
 
 
     override fun onCreateView(
@@ -48,6 +49,10 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        savedInstanceState?.let {
+            page = it.getInt("page")
+            searchQuery = it.getString("searchQuery").toString()
+        }
         return binding.root
     }
 
@@ -64,12 +69,17 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        val likeList = MyApp.pref.loadLikeItems()
-        homeAdapter.currentList.forEach {
-            if (!likeList.contains(it)) it.like = false
-        }
+        // 질문 !!
+        homeViewModel.callSearchList()
         homeAdapter.notifyDataSetChanged()
-//        homeAdapter.submitList(homeAdapter.currentList.toList())
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.let {
+            it.putInt("page", page)
+            it.putString("searchQuery", searchQuery)
+        }
     }
 
     private fun initSearchView() {
@@ -80,8 +90,9 @@ class HomeFragment : Fragment() {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     searchQuery = query ?: ""
+                    page = 1
+                    homeViewModel.getHomeData(key, searchQuery, page)
                     MyApp.pref.setString("FirstQuery", searchQuery)
-                    homeViewModel.loadFirstPage()
                     return false
                 }
 
@@ -126,6 +137,7 @@ class HomeFragment : Fragment() {
     private fun initRecyclerView() {
         with(binding.homeRev) {
             adapter = homeAdapter
+            itemAnimator = null
             addScroll(this)
         }
         initLikeButton()
@@ -147,17 +159,20 @@ class HomeFragment : Fragment() {
     private fun dataObserve() {
         with(homeViewModel) {
             searchList.observe(viewLifecycleOwner) { searchList ->
+                Log.d("homeFragment:","$searchList")
                 homeAdapter.submitList(searchList.toList())
+
             }
 
             isLoading.observe(viewLifecycleOwner) { isLoading ->
                 this@HomeFragment.isLoading = isLoading
             }
 
-            page.observe(viewLifecycleOwner) { page ->
-                val query = MyApp.pref.getString("FirstQuery", " ")
-                homeViewModel.getHomeData(key, query, page)
-            }
+//            page.observe(viewLifecycleOwner) { page ->
+//                val query = MyApp.pref.getString("FirstQuery", " ")
+//                Log.d("HomeFragment:","page= $page")
+//                homeViewModel.getHomeData(key, query, page)
+//            }
 
         }
     }
@@ -169,7 +184,7 @@ class HomeFragment : Fragment() {
 
         if (!isLoading && lastItemPosition == totalItemCount - 1) {
             isLoading = true
-            homeViewModel.loadNextPage()
+            homeViewModel.getHomeData(key, searchQuery, ++page)
 //            showLoading()
 //            viewLifecycleOwner.lifecycleScope.launch {
 
