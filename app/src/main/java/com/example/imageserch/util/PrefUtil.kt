@@ -8,6 +8,7 @@ import com.google.gson.Gson
 class PrefUtil(context: Context) {
     private val keywordPref = context.getSharedPreferences("keyword_pref", Context.MODE_PRIVATE)
     private val searchPref = context.getSharedPreferences("search_pref", Context.MODE_PRIVATE)
+    private val keywordListPref = context.getSharedPreferences("keyword_list_pref", Context.MODE_PRIVATE)
 
     fun getString(key: String, defaultValue: String): String {
         return keywordPref.getString(key, defaultValue).toString()
@@ -34,6 +35,21 @@ class PrefUtil(context: Context) {
             likeList.add(likeItem)
         }
         return likeList
+    }
+
+    fun addKeywordList(item: String)  {
+        keywordListPref.edit().putString(item, item).apply()
+    }
+
+    fun loadKeywordList(): MutableList<String> {
+        val keywordList = keywordListPref.all.map {
+            it.value as String
+        }
+        return keywordList.toMutableList()
+    }
+
+    fun removeKeywordList(item: String) {
+        keywordListPref.edit().remove(item).apply()
     }
 
 

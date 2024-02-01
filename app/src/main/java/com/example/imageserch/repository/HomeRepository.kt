@@ -71,4 +71,16 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
             searchItem.like = searchItem.thumbnail in likeKeyList
         }
     }
+
+    fun addKeyword(item: String) {
+        MyApp.pref.addKeywordList(item)
+    }
+
+    fun loadKeywordList(): MutableList<String> {
+        return MyApp.pref.loadKeywordList()
+    }
+
+    fun removeKeyword(item: String) {
+        MyApp.pref.removeKeywordList(item)
+    }
 }

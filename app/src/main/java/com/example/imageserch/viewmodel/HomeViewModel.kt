@@ -21,6 +21,8 @@ class HomeViewModel(
     var searchList: LiveData<List<SearchItem>> = _searchList
     private var _isLoading = MutableLiveData<Boolean>()
     var isLoading: LiveData<Boolean> = _isLoading
+    private var _keywordList = MutableLiveData<List<String>>()
+    var keywordList: LiveData<List<String>> = _keywordList
 //    private var _page = MutableLiveData<Int>()
 //    var page: LiveData<Int> = _page
 
@@ -47,5 +49,30 @@ class HomeViewModel(
             _searchList.value = it
         }
     }
+
+    fun addKeywordList(item: String) {
+        removeKeywordList(item)
+        homeRepository.addKeyword(item)
+        loadKeywordList()
+//        val newKeywordList = _keywordList.value?.toMutableList()?.apply {
+//            add(item)
+//        } ?: mutableListOf()
+//        _keywordList.value = newKeywordList
+    }
+
+    fun loadKeywordList() {
+        _keywordList.value = homeRepository.loadKeywordList()
+    }
+
+    fun removeKeywordList(item: String) {
+        homeRepository.removeKeyword(item)
+        loadKeywordList()
+//        val newKeywordList =
+//            _keywordList.value?.toMutableList()?.apply {
+//                remove(item)
+//            } ?: mutableListOf()
+//        _keywordList.value = newKeywordList
+//        load하면 괜찮은가..
+    }
+
 }
-// 여기 뷰모델에서 리무브한 걸 바로 searchList에 반영시키면 될듯한

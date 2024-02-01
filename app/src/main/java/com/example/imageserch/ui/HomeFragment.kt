@@ -9,12 +9,9 @@ import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.Recycler
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.MyApp
 import com.example.imageserch.R
@@ -23,9 +20,9 @@ import com.example.imageserch.data.SearchItem
 import com.example.imageserch.databinding.FragmentHomeBinding
 import com.example.imageserch.extention.fadeAnimation
 import com.example.imageserch.ui.adapter.HomeAdapter
+import com.example.imageserch.ui.adapter.KeywordAdapter
 import com.example.imageserch.viewmodel.HomeViewModel
 import com.example.imageserch.viewmodel.ViewModelFactory
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -36,6 +33,7 @@ class HomeFragment : Fragment() {
     private val homeViewModel: HomeViewModel by viewModels { ViewModelFactory() }
     private val sharedViewModel: SharedViewModel by viewModels { ViewModelFactory() }
     private val homeAdapter: HomeAdapter by lazy { HomeAdapter() }
+    private val keywordAdapter: KeywordAdapter by lazy { KeywordAdapter() }
     private val loadingDialog: LoadingDialog by lazy { LoadingDialog(requireContext()) }
     private val key: String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
     private lateinit var searchQuery: String
@@ -64,7 +62,8 @@ class HomeFragment : Fragment() {
 
     private fun initViews() {
         initSearchView()
-        initRecyclerView()
+        initSearchRecyclerView()
+        initKeywordRecyclerView()
     }
 
     override fun onResume() {
@@ -92,6 +91,7 @@ class HomeFragment : Fragment() {
                     searchQuery = query ?: ""
                     page = 1
                     homeViewModel.getHomeData(key, searchQuery, page)
+                    homeViewModel.addKeywordList(searchQuery)
                     MyApp.pref.setString("FirstQuery", searchQuery)
                     return false
                 }
@@ -116,6 +116,31 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun initKeywordRecyclerView() {
+        val keywordList = homeViewModel.loadKeywordList()
+        with(binding.keywordRev) {
+            adapter = keywordAdapter
+            object : KeywordAdapter.OnItemClickListener {
+                override fun onItemClick(data: String, pos: Int) {
+                    binding.homeSearch.setQuery(data, true)
+                }
+
+                override fun onCancelClick(data: String, pos: Int) {
+                    homeViewModel.removeKeywordList(data)
+                }
+            }.also { keywordAdapter.listener = it }
+        }
+    }
+
+    private fun initSearchRecyclerView() {
+        with(binding.homeRev) {
+            adapter = homeAdapter
+            itemAnimator = null
+            addScroll(this)
+        }
+        initLikeButton()
+     }
+
     private fun addScroll(recyclerView: RecyclerView) {
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
@@ -134,14 +159,6 @@ class HomeFragment : Fragment() {
         })
     }
 
-    private fun initRecyclerView() {
-        with(binding.homeRev) {
-            adapter = homeAdapter
-            itemAnimator = null
-            addScroll(this)
-        }
-        initLikeButton()
-     }
     private fun initLikeButton () {
         object : HomeAdapter.OnItemClickListener {
             override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView) {
@@ -161,19 +178,15 @@ class HomeFragment : Fragment() {
             searchList.observe(viewLifecycleOwner) { searchList ->
                 Log.d("homeFragment:","$searchList")
                 homeAdapter.submitList(searchList.toList())
-
             }
 
             isLoading.observe(viewLifecycleOwner) { isLoading ->
                 this@HomeFragment.isLoading = isLoading
             }
 
-//            page.observe(viewLifecycleOwner) { page ->
-//                val query = MyApp.pref.getString("FirstQuery", " ")
-//                Log.d("HomeFragment:","page= $page")
-//                homeViewModel.getHomeData(key, query, page)
-//            }
-
+            keywordList.observe(viewLifecycleOwner) { keywordList ->
+                keywordAdapter.submitList(keywordList.toList())
+            }
         }
     }
 
@@ -201,11 +214,11 @@ class HomeFragment : Fragment() {
         }
     }
 
-    fun showLoading() {
+    private fun showLoading() {
         loadingDialog.show()
     }
 
-    fun dismissLoading() {
+    private fun dismissLoading() {
         if (loadingDialog.isShowing) {
             loadingDialog.dismiss()
             binding.homeSearch.clearFocus()
