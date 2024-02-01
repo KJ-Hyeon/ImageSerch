@@ -1,5 +1,6 @@
 package com.example.imageserch.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,6 +19,7 @@ class SharedViewModel(private val prefRepository: PreferenceRepository): ViewMod
     }
     fun removeLikeItem(item: SearchItem) {
         prefRepository.removeItem(item)
+        if (prefRepository.loadLikeItems().isEmpty()) _isBadgeVisible.value = false
     }
 
     fun addLikeItem(item: SearchItem) {

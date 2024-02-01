@@ -8,6 +8,8 @@ import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import com.airbnb.lottie.Lottie
+import com.airbnb.lottie.LottieAnimationView
 import com.example.imageserch.data.SearchItem
 import com.example.imageserch.databinding.FragmentStorageBinding
 import com.example.imageserch.ui.adapter.HomeAdapter
@@ -47,7 +49,7 @@ class StorageFragment : Fragment() {
         with(binding.revStorage) {
             adapter = homeAdapter
             homeAdapter.listener = object : HomeAdapter.OnItemClickListener {
-                override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView) {
+                override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView, lottie: LottieAnimationView) {
                     data.like = !data.like
                     sharedViewModel.removeLikeItem(data)
                     sharedViewModel.getLikeList()

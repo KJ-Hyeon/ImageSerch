@@ -1,5 +1,6 @@
 package com.example.imageserch.ui
 
+import android.animation.Animator
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.MyApp
 import com.example.imageserch.R
@@ -162,16 +164,29 @@ class HomeFragment : Fragment() {
 
     private fun initLikeButton () {
         object : HomeAdapter.OnItemClickListener {
-            override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView) {
+            override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView, lottie: LottieAnimationView) {
                 iv.setLikeImage(!data.like)
                 data.like = !data.like
                 if (data.like) {
                     sharedViewModel.addLikeItem(data)
+                    lottie.visibility = View.VISIBLE
+                    lottie.playAnimation()
+                    lottie.addAnimatorListener(lottieListener(lottie))
                 } else {
                     sharedViewModel.removeLikeItem(data)
                 }
             }
         }.also { homeAdapter.listener = it }
+    }
+
+    private fun lottieListener(lottie: LottieAnimationView) =
+        object : Animator.AnimatorListener {
+            override fun onAnimationStart(p0: Animator) {}
+            override fun onAnimationCancel(p0: Animator) {}
+            override fun onAnimationRepeat(p0: Animator) {}
+            override fun onAnimationEnd(p0: Animator) {
+                lottie.visibility = View.INVISIBLE
+            }
     }
 
     private fun dataObserve() {
