@@ -2,7 +2,6 @@ package com.example.imageserch.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.imageserch.SharedViewModel
 import com.example.imageserch.network.RetrofitInstance
 import com.example.imageserch.repository.HomeRepository
 import com.example.imageserch.repository.PreferenceRepository

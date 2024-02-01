@@ -18,6 +18,14 @@ class PrefUtil(context: Context) {
         keywordPref.edit().putString(key, value).apply()
     }
 
+    fun getBadgeVisible(): Boolean {
+        return keywordPref.getBoolean("badgeVisible",false)
+    }
+
+    fun setBadgeVisible(value: Boolean) {
+        keywordPref.edit().putBoolean("badgeVisible", value).apply()
+    }
+
     fun addLikeItem(item: SearchItem) {
         val jsonString = Gson().toJson(item)
         searchPref.edit().putString(item.thumbnail, jsonString).apply()
@@ -54,3 +62,4 @@ class PrefUtil(context: Context) {
 
 
 }
+

@@ -1,4 +1,4 @@
-package com.example.imageserch
+package com.example.imageserch.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,6 +10,8 @@ class SharedViewModel(private val prefRepository: PreferenceRepository): ViewMod
 
     private var _likeList = MutableLiveData<List<SearchItem>>()
     var likeList: LiveData<List<SearchItem>> = _likeList
+    private var _isBadgeVisible = MutableLiveData<Boolean> ()
+    var isBadgeVisible: LiveData<Boolean>  = _isBadgeVisible
 
     fun getLikeList() {
         _likeList.value = prefRepository.loadLikeItems()
@@ -19,7 +21,13 @@ class SharedViewModel(private val prefRepository: PreferenceRepository): ViewMod
     }
 
     fun addLikeItem(item: SearchItem) {
+        // add를 할 때 뱃지변수를 true
         prefRepository.addLikeItem(item)
+        _isBadgeVisible.value = true
+    }
+
+    fun setBadgeInvisible() {
+        _isBadgeVisible.value = false
     }
 
 }

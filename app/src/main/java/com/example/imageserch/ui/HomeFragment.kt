@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -15,13 +16,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.MyApp
 import com.example.imageserch.R
-import com.example.imageserch.SharedViewModel
 import com.example.imageserch.data.SearchItem
 import com.example.imageserch.databinding.FragmentHomeBinding
 import com.example.imageserch.extention.fadeAnimation
 import com.example.imageserch.ui.adapter.HomeAdapter
 import com.example.imageserch.ui.adapter.KeywordAdapter
 import com.example.imageserch.viewmodel.HomeViewModel
+import com.example.imageserch.viewmodel.SharedViewModel
 import com.example.imageserch.viewmodel.ViewModelFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,12 +32,12 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val homeViewModel: HomeViewModel by viewModels { ViewModelFactory() }
-    private val sharedViewModel: SharedViewModel by viewModels { ViewModelFactory() }
+    private val sharedViewModel: SharedViewModel by activityViewModels { ViewModelFactory() }
     private val homeAdapter: HomeAdapter by lazy { HomeAdapter() }
     private val keywordAdapter: KeywordAdapter by lazy { KeywordAdapter() }
     private val loadingDialog: LoadingDialog by lazy { LoadingDialog(requireContext()) }
     private val key: String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
-    private lateinit var searchQuery: String
+    private var searchQuery: String = ""
     private var isLoading = false
     private var page = 1
 

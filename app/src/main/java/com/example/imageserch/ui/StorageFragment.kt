@@ -6,11 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import com.example.imageserch.SharedViewModel
 import com.example.imageserch.data.SearchItem
 import com.example.imageserch.databinding.FragmentStorageBinding
 import com.example.imageserch.ui.adapter.HomeAdapter
+import com.example.imageserch.viewmodel.SharedViewModel
 import com.example.imageserch.viewmodel.ViewModelFactory
 
 class StorageFragment : Fragment() {
@@ -18,7 +19,7 @@ class StorageFragment : Fragment() {
     private var _binding: FragmentStorageBinding? = null
     private val binding get() = _binding!!
     private val homeAdapter: HomeAdapter by lazy { HomeAdapter() }
-    private val sharedViewModel: SharedViewModel by viewModels { ViewModelFactory() }
+    private val sharedViewModel: SharedViewModel by activityViewModels { ViewModelFactory() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,17 +30,10 @@ class StorageFragment : Fragment() {
         return binding.root
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         sharedViewModel.getLikeList()
+        sharedViewModel.setBadgeInvisible()
         initRecyclerView()
         dataObserve()
     }
