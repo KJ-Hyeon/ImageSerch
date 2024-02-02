@@ -6,6 +6,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.api.load
 import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.imageserch.R
@@ -44,10 +45,7 @@ class HomeAdapter : ListAdapter<SearchItem, HomeAdapter.SearchViewHolder>(diffUt
                 itemImageTitle.text = item.title
                 itemImageDate.text = item.dateTime.setTime()
                 itemImageLike.setImageResource(if (item.like) R.drawable.like_fill else R.drawable.like)
-
-                Glide.with(itemImageImage)
-                    .load(item.thumbnail)
-                    .into(itemImageImage)
+                itemImageImage.load(item.thumbnail)
                 itemImageLike.setOnClickListener {
                     listener?.onLikeClick(adapterPosition, item ,itemImageLike, itemLottieLike)
                 }

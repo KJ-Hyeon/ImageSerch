@@ -48,7 +48,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        Log.d("onStop:","onStop")
         MyApp.pref.setBadgeVisible(badgeVisible)
     }
 }

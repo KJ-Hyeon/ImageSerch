@@ -6,9 +6,11 @@
     android:layout_marginStart="8dp"
     android:backgroundTint="@color/recent_keyword_color"
     app:cardCornerRadius="20dp"
-    app:cardElevation="6dp"
+    app:cardElevation="4dp"
+    android:layout_marginTop="12dp"
     app:contentPaddingBottom="4dp"
     app:contentPaddingLeft="8dp"
+    android:layout_marginBottom="12dp"
     app:contentPaddingRight="8dp"
     app:contentPaddingTop="4dp">
 

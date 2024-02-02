@@ -14,6 +14,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.MyApp
@@ -91,7 +93,7 @@ class HomeFragment : Fragment() {
             setQuery(previousQuery, false)
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
-                    searchQuery = query ?: ""
+                    searchQuery = query?.trim() ?: ""
                     page = 1
                     homeViewModel.getHomeData(key, searchQuery, page)
                     homeViewModel.addKeywordList(searchQuery)
@@ -114,7 +116,7 @@ class HomeFragment : Fragment() {
             }
             fadeAnimation(true)
             setOnClickListener {
-                binding.homeRev.smoothScrollToPosition(0)
+                binding.homeRev.smoothScrollBy(0, -binding.homeRev.computeVerticalScrollOffset(), null, 1000)
             }
         }
     }
@@ -140,6 +142,7 @@ class HomeFragment : Fragment() {
             adapter = homeAdapter
             itemAnimator = null
             addScroll(this)
+            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         }
         initLikeButton()
      }
@@ -157,7 +160,7 @@ class HomeFragment : Fragment() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 // 스크롤을 아래로 땡기면 dy<0 스크롤을 위로 땡기면 dy>0
-                checkLastItem(recyclerView)
+//                checkLastItem(recyclerView)
             }
         })
     }
@@ -206,21 +209,21 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun checkLastItem(rev: RecyclerView) {
-        val layoutManager = rev.layoutManager as GridLayoutManager
-        val lastItemPosition = layoutManager.findLastVisibleItemPosition()
-        val totalItemCount = layoutManager.itemCount
-
-        if (!isLoading && lastItemPosition == totalItemCount - 1) {
-            isLoading = true
-            showLoading()
-            viewLifecycleOwner.lifecycleScope.launch {
-                homeViewModel.getHomeData(key, searchQuery, ++page)
-                delay(2000)
-                dismissLoading()
-            }
-        }
-    }
+//    private fun checkLastItem(rev: RecyclerView) {
+//        val layoutManager = rev.layoutManager as StaggeredGridLayoutManager
+//        val lastItemPosition = layoutManager.findLastVisibleItemPosition()
+//        val totalItemCount = layoutManager.itemCount
+//
+//        if (!isLoading && lastItemPosition == totalItemCount - 1) {
+//            isLoading = true
+//            showLoading()
+//            viewLifecycleOwner.lifecycleScope.launch {
+//                homeViewModel.getHomeData(key, searchQuery, ++page)
+//                delay(2000)
+//                dismissLoading()
+//            }
+//        }
+//    }
 
     fun ImageView.setLikeImage(state: Boolean) {
         if (state) {

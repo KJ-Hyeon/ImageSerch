@@ -10,7 +10,7 @@
         style="@style/SpinKitView.Large.CubeGrid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:SpinKit_Color="@color/purple_200"
+        app:SpinKit_Color="@color/loading_color"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

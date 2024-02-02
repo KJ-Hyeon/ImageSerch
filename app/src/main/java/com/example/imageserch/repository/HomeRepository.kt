@@ -47,7 +47,7 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
         getImage(key, query, page).let {result->
             result.onSuccess { imageResponse->
                 searchItems.addAll(imageResponse.images.map {
-                    SearchItem("image", it.thumbnail_url, it.display_sitename, it.datetime, it.display_sitename, false)
+                    SearchItem("image", it.image_url, it.display_sitename, it.datetime, it.display_sitename, false)
                 })
             }
         }

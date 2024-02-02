@@ -62,16 +62,13 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     // OKHttp for 통신 로그
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
-    //Glide
-    implementation ("com.github.bumptech.glide:glide:4.13.0")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.13.0")
     //Loading animations
     implementation ("com.github.ybq:Android-SpinKit:1.4.0")
     //Lottie animation
     implementation ("com.airbnb.android:lottie:5.0.2")
-
+    // coil
+    implementation("io.coil-kt:coil:0.10.0")
 }
-
 fun getAPiKey(propertyKey: String): String {
     return gradleLocalProperties(rootDir).getProperty(propertyKey)
 }
