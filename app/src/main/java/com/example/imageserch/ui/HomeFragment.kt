@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -20,6 +21,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.example.imageserch.BuildConfig
 import com.example.imageserch.MyApp
 import com.example.imageserch.R
+import com.example.imageserch.data.Image
 import com.example.imageserch.data.SearchItem
 import com.example.imageserch.databinding.FragmentHomeBinding
 import com.example.imageserch.extention.fadeAnimation
@@ -168,26 +170,27 @@ class HomeFragment : Fragment() {
     private fun initLikeButton () {
         object : HomeAdapter.OnItemClickListener {
             override fun onLikeClick(pos: Int, data: SearchItem, iv: ImageView, lottie: LottieAnimationView) {
-                iv.setLikeImage(!data.like)
                 data.like = !data.like
                 if (data.like) {
                     sharedViewModel.addLikeItem(data)
                     lottie.visibility = View.VISIBLE
                     lottie.playAnimation()
-                    lottie.addAnimatorListener(lottieListener(lottie))
+                    lottie.addAnimatorListener(lottieListener(lottie, iv, data))
                 } else {
+                    iv.setLikeImage(false)
                     sharedViewModel.removeLikeItem(data)
                 }
             }
         }.also { homeAdapter.listener = it }
     }
 
-    private fun lottieListener(lottie: LottieAnimationView) =
+    private fun lottieListener(lottie: LottieAnimationView, iv: ImageView, data: SearchItem) =
         object : Animator.AnimatorListener {
             override fun onAnimationStart(p0: Animator) {}
             override fun onAnimationCancel(p0: Animator) {}
             override fun onAnimationRepeat(p0: Animator) {}
             override fun onAnimationEnd(p0: Animator) {
+                iv.setLikeImage(data.like)
                 lottie.visibility = View.INVISIBLE
             }
     }

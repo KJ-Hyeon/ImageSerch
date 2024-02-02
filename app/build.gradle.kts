@@ -68,7 +68,9 @@ dependencies {
     implementation ("com.airbnb.android:lottie:5.0.2")
     // coil
     implementation("io.coil-kt:coil:0.10.0")
+
 }
+
 fun getAPiKey(propertyKey: String): String {
     return gradleLocalProperties(rootDir).getProperty(propertyKey)
 }

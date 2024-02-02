@@ -46,6 +46,7 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
         }
         getImage(key, query, page).let {result->
             result.onSuccess { imageResponse->
+                Log.d("HomeRepository:",imageResponse.images[3].image_url)
                 searchItems.addAll(imageResponse.images.map {
                     SearchItem("image", it.image_url, it.display_sitename, it.datetime, it.display_sitename, false)
                 })
@@ -66,7 +67,6 @@ class HomeRepository(private val retrofit: RetrofitInterface) {
     fun checkLikeItems(items: MutableList<SearchItem>) {
         val likeList = MyApp.pref.loadLikeItems()
         val likeKeyList = likeList.map { it.thumbnail }
-        Log.d("HomeRepository:","$likeKeyList")
         items.forEach { searchItem ->
             searchItem.like = searchItem.thumbnail in likeKeyList
         }
