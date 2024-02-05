@@ -18,7 +18,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "kakao_key", getAPiKey("kakao_key") )
+//        buildConfigField("String", "kakao_key", getAPiKey("kakao_key") )
     }
 
     buildTypes {
@@ -71,6 +71,6 @@ dependencies {
 
 }
 
-fun getAPiKey(propertyKey: String): String {
-    return gradleLocalProperties(rootDir).getProperty(propertyKey)
-}
+//fun getAPiKey(propertyKey: String): String {
+//    return gradleLocalProperties(rootDir).getProperty(propertyKey)
+//}

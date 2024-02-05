@@ -42,7 +42,7 @@ class HomeFragment : Fragment() {
     private val homeAdapter: HomeAdapter by lazy { HomeAdapter() }
     private val keywordAdapter: KeywordAdapter by lazy { KeywordAdapter() }
     private val loadingDialog: LoadingDialog by lazy { LoadingDialog(requireContext()) }
-    private val key: String by lazy { "KakaoAK ${BuildConfig.kakao_key}" }
+    private val key: String by lazy { "KakaoAK f9dbd4214dbb08f7470ed1359de0f967" }
     private var searchQuery: String = ""
     private var isLoading = false
     private var page = 1
